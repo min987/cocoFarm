@@ -11,6 +11,7 @@ $(document).ready(function() {
 
 function closeLayer( obj ) {
 	$(obj).parent().parent().hide();
+	$(obj).parent().parent().parent().hide();
 }
 var idx;
 $(function(){
@@ -45,26 +46,39 @@ function messageView( idx, messageCate ) {
 		data : {
 			messageCate : messageCate
 			, idx : idx 
-			 , curPage: '${curPage }'
+			, curPage:'${curPage }'
 		},
 		success : function(res) {
 //				alert("성공");
 
-			var h = 600;
+			var h = 500;
 			var w = 400;
 			
 			$("#messageView").html(res);
 				var divTop = window.innerHeight/2 - h/2;
 				var divLeft = window.innerWidth/2 - w/2;
-				idx = $(this).data("idx");
-				$('#messageView').css({
-					"top": divTop,
-					"left": divLeft,
-					"width": h+"px",
-					"height": w+"px",
+			idx = $(this).data("idx");
+			
+			$('#messageView').css({
+					"top": 0,
+					"left": 0, 
+					"width": "100%",
+					"height": "100%",
 					"position": "fixed",
-					"background-color": "lightgray"
+					"background-color": "rgba(0, 0, 0, 0.5)"
 				}).show();
+			
+			
+			$('.message_center').css({
+				"padding":"30px",
+				"top":  divTop,
+				"left": divLeft, 
+				"width": "450px",
+				"height": "400px",
+				"position": "fixed",
+				"background-color": "rgba(255, 255, 255)",
+				"border-radius":"5px"
+			}).show();
 		}
 		, error: function(e) {
 			console.log("실패");
@@ -113,9 +127,9 @@ $("#btnDelete").click(function() {
 });
 </script>
 <div>
-	<table class="message_table">
+	<table class="message_table message_read" style="text-align: center;">
 		<thead>
-			<tr>
+			<tr class="message_tr">
 				<th class="message_th"><input type="checkbox" id="checkAll" /></th>
 				<th class="message_th">제목</th>
 				<c:if test="${messageCate eq 1 }">
@@ -134,7 +148,7 @@ $("#btnDelete").click(function() {
 		</thead>
 		<tbody>
 		<c:forEach items="${messageList }" var="message">
-			<tr>
+			<tr class="message_tr">
 				<td class="message_td"><input type="checkbox" id="check${message.idx }"name="checkRow" value="${message.idx }" />${message.idx }</td>
 				<td class="message_td"><a href="#" onclick="messageView(${message.idx }, ${messageCate });">${message.title }</a></td>
 				<c:if test="${messageCate eq 1 }">
@@ -149,7 +163,7 @@ $("#btnDelete").click(function() {
 		</tbody>
 	</table>
 	<br>
-	<button id="btnDelete">삭제</button>
+	<button id="btnDelete" class="mess_btn_cancle">삭제</button>
 	<br>
 	<jsp:include page="/WEB-INF/views/util/messagePaging.jsp" />
 	

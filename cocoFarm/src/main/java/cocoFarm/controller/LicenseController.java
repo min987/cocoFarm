@@ -49,16 +49,10 @@ public class LicenseController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
 		license.setLicense_storedName(stored);
 		license.setAcc_idx((int)session.getAttribute("idx"));
 		
-		System.out.println(license.toString());
-		
 		licenseService.license(license);
-		
-		
 		
 		return "redirect:/mypageIntro.do";
 	}
@@ -69,11 +63,12 @@ public class LicenseController {
 	}
 	
 	@RequestMapping(value="/mypage/deleteLicense.do", method=RequestMethod.POST)
-	public String deleteLicense(LicenseDto license) {
-		
-		System.out.println("라이센스 삭제 = "+license.getAcc_idx());
+	public String deleteLicense(LicenseDto license,HttpSession session) {
 		
 		licenseService.deleteLicense(license);
+		licenseService.updateAccType(license);
+		licenseService.updateSaleIsdel(license);
+		session.setAttribute("type", Integer.valueOf(3));
 		
 		return "redirect:/mypageIntro.do";
 	}

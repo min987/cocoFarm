@@ -14,7 +14,6 @@ $(document).ready(function(){
 			$("#alarm").after("<span>"+data.alarmCnt+"</span>");
 		},
 	   error : function(e) {
-// 		   alert("실패"); 
 	   }
 	});
 	</c:if>
@@ -78,7 +77,7 @@ a#MOVE_TOP_BTN {
 				<c:when test="${sessionScope.type==1}">
 					<li>고 객</li>
 					<li>판매자</li>
-					<li class="choose_color3">관리자</li>
+					<li class="choose_color1">관리자</li>
 				</c:when>
 				<c:otherwise>
 					<li>고 객</li>
@@ -97,7 +96,7 @@ a#MOVE_TOP_BTN {
 			<li><a href="/login/join.do">회원가입</a></li>
 			</c:if>
 			<c:if test="${sessionScope.idx eq null }">
-			<li><a href="/mypage/message.do" id="alarm">알림</a></li>	
+			<li><a href="/mypageIntro.do" id="alarm">알림</a></li>	
 			</c:if>
 			<c:if test="${sessionScope.idx ne null }">
 			

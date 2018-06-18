@@ -1,6 +1,7 @@
 package cocoFarm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import cocoFarm.dto.Cart;
 import cocoFarm.dto.SaleOption;
@@ -12,9 +13,9 @@ public interface SaleOptionDao {
 	public List selectAll();
 	
 	// 모든 옵션 개수 조회
-	public int countAll();
+	public int countAll(int acc_idx);
 	
-	public List selectPage(Paging paging);
+	public List selectPage(Paging paging, int acc_idx);
 	
 	public void insert(SaleOption saleOption);
 
@@ -47,4 +48,6 @@ public interface SaleOptionDao {
 //	public List<SaleOption> selectCart(int accIdx);
 	
 	public void deleteCart(int saleOptionIdx);
+	
+	public void updateCart(Map cart);
 }

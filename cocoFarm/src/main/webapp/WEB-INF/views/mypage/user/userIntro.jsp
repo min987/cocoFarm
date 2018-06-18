@@ -7,15 +7,73 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>장바구니 조회</title>
+<title>마이페이지</title>
 <link rel="stylesheet" type="text/css" href="/css/reset.css">
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <link rel="stylesheet" type="text/css" href="/css/board.css">
+<link rel="stylesheet" type="text/css" href="/css/message.css">
 <script type="text/javascript"
 	src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script> <!-- 주소 API -->
+<!-- Naver SmartEditor -->
+<script type="text/javascript"
+ src="/resources/smarteditor/js/service/HuskyEZCreator.js" charset="utf-8"></script>
+
 <script type="text/javascript">
-$(document).ready(function() {	
+/* 숫자만 입력 시키게 하는것 */
+function onlyNumber(obj){
+	val=obj.value;
+	re=/[^0-9]/gi;
+	obj.value=val.replace(re,"");
+}
+
+$(document).ready(function() {
+	/* 장바구니 옵션 변경 버튼 */
+	$.ajax({
+		type: "POST"
+		, url: "/product/cart.do"
+		, data: {
+			// 장바구니 상품
+		}
+		, dataType: "json"
+		, success: function(data) {
+			
+		}
+	})
+
+	$("#messageCate").change(function() {
+
+		var messageCate = $(this).val();
+		$.ajax({
+			type : "POST",
+			url : "/mypage/readMessage.do",
+			dataType : "html",
+			data : {
+				messageCate : messageCate
+				 , curPage: '${curPage }'
+			},
+			success : function(res) {
+// 				alert("성공");
+				$("#messageBox").html(res);
+			}
+		});
+	});
+
+	$("#messageCate").trigger("change");
+	
+	$("#sendMessageBtn").click(function(e){
+		popupOpen();
+	});
+	function popupOpen(){
+		var url= "/mypage/writeMessage.do";    //팝업창 페이지 URL
+		var winWidth = 400;
+	    var winHeight = 500;
+	    var popupOption= "width="+winWidth+", height="+winHeight;    //팝업창 옵션(optoin)
+		window.open(url,"",popupOption);
+	}
+	
+	
+	
 	$(".mypage_navbody").on("click", ".nav-link", function() {
 		var page = $(this).children().attr("href");
 		console.log(page);
@@ -34,10 +92,69 @@ $(document).ready(function() {
 		return false;
 	});
 	
-});
-</script>
+	
+	/* 글자수 제한  */
+	var textCountLimit = 15;
+	var textCountLimit2 = 40;
+	$('textarea[name=optionName]').keyup(function() {
+	     // 텍스트영역의 길이를 체크
+	     var textLength = $(this).val().length;
+	
+	     // 입력된 텍스트 길이를 #textCount 에 업데이트 해줌
+	     $('#textCount').text(textLength);
+	      
+	     // 제한된 길이보다 입력된 길이가 큰 경우 제한 길이만큼만 자르고 텍스트영역에 넣음
+	     if (textLength > textCountLimit) {
+	         $(this).val($(this).val().substr(0, textCountLimit));
+	     }
+	});
 
-<script>
+	$(".save_button").click(function() {
+		if($(".category option:selected").val()==0) {
+		  alert("카테고리를 선택해주세요.");
+		  return false;
+		} else if($.trim($("#title").val())=="") {
+		  alert("제목을 입력해주세요.");
+		  return false;
+		} else if($("textarea[name=optionName]").val()==""){
+		  alert("옵션을 입력해주세요.");
+		  return false;
+		} else if($("textarea[name=startAmount]").val()==""){
+	    alert("판매수량을 입력해주세요.");
+	    return false;
+		} else if($("textarea[name=unit]").val()==""){
+      alert("단위를 입력해주세요.");
+      return false;
+		} else if($("textarea[name=price]").val()==""){
+      alert("판매가격을 입력해주세요.");
+      return false;
+		}
+		
+		// 옵션 여러 개 보내기 기능 구현할 때 json 형식으로 담아봄
+// 		var option = {
+// 			optionName: $("textarea[name=optionName]").val(),
+// 			startAmount: $("textarea[name=startAmount]").val(),
+// 			unit: $("textarea[name=unit]").val(),
+// 			price: $("textarea[name=price]").val()
+// 		};
+// 		alert(option.optionName);
+		
+		submitContents($(this));
+	});
+	
+});
+
+
+// 네이버 스마트에디터를 사용하는 방법
+function submitContents(elClickedObj) {
+    // 에디터의 내용이 textarea에 적용된다.
+    oEditors.getById["content"].exec("UPDATE_CONTENTS_FIELD", []);
+
+    try {
+      elClickedObj.form.submit();
+    } catch(e) {}
+}
+
 (function() {
 	var tableEl = document.querySelector('.tr_cartItem');
 	var mainHtml = tableEl.innerHTML;
@@ -54,100 +171,36 @@ $(document).ready(function() {
 
 })
 
-function cartItems() {
-// 	var size = ${optionView };
-}
 
-$(document).ready(function() {
-	
-	/* 장바구니 옵션 변경 버튼 */
-	$.ajax({
-		type: "POST"
-		, url: "/product/cart.do"
-		, data: {
-			// 장바구니 상품
-		}
-		, dataType: "json"
-		, success: function(data) {
-			
-		}
-	})
-	
-});
 </script>
 
 </head>
 <body>
 <div id="mypageheader">
 
-<!--Mypage부분 header ver3부분  -->
-<jsp:include page="/WEB-INF/views/tile/head/mypagehead.jsp" flush="false"/>
-
-	<div class="container">
-		<!--Mypage부분  검색 로고부분 -->
-		<jsp:include page="/WEB-INF/views/tile/head/mypageSearch.jsp" flush="false"/>
-
-		<div class="mypage_box">
-			<div class="mypage_nav">
-				<div class="mypage_topbusiness">
-					<div class="mypagetitle03"><h2>일반 회원</h2><h1>마이페이지</h1></div>
-					<div class="mypageimg"><img src="/img/profile/${account.thumb_loc}" ></div>
-					<div class="mypagewho"><span><strong>${sessionScope.name}</strong>님&nbsp;</span>환영합니다.</div>
-					<div class="mail_box"><a class="nav-link" href="/mypage/message.do"><img src="/img/mypage/mypageicon/mess.png" alt="쪽지" >쪽지함 확인</a></div>
-				</div>
-			
-				<div class="mypage_navbody">
+	<!--Mypage부분 header ver3부분  -->
+	<jsp:include page="/WEB-INF/views/tile/head/mypagehead.jsp" flush="false"/>
+	
+		<div class="container">
+			<!--Mypage부분  검색 로고부분 -->
+			<jsp:include page="/WEB-INF/views/tile/head/mypageSearch.jsp" flush="false"/>
+	
+			<div class="mypage_box">
 					
-					<p class="navtitle_01"><img alt="" src="/img/mypage/mypageicon/mypage_info.png">개인정보 관리</p>
-					
-					<ul>
-						<li class="nav-link"><a href="/mypage/user/updateAccount.do">개인정보 수정</a></li>
-						<li class="nav-link"><a href="/mypage/deleteAcc.do">회원 탈퇴</a></li>
-						<li class="nav-link"><a href="/mypage/license.do">사업자 등록하기</a></li>
-					</ul>
-					
-					<p class="navtitle_02"><img alt="" src="/img/mypage/mypageicon/mypage_sale.png">상품보기</p>
-					
-					<ul>
-						
-						<li class="nav-link"><a href="/product/cart.do">장바구니 조회</a></li>
-						<li class="nav-link"><a href="/payNee.do">결제 내역 조회111111 </a></li>
-						
-					</ul>
-					<p class="navtitle_03"><img alt="" src="/img/mypage/mypageicon/mypage_aution.png">경매</p>
-					<ul>
-						<!-- <li><a href="#">경매등록하기</a></li> -->
-						<li><a href="#">경매 상품 조회하기</a></li>
-					</ul>
-					
-					<p class="navtitle_04"><img alt="" src="/img/mypage/mypageicon/mypage_service.png">고객센터</p>
-					<ul>
-						<li class="nav-link"><a href="/mypage/writeInquiry.do">관리자에게 문의하기</a></li>
-					</ul>
-					
-				</div>
-			
+				<!--Mypage부분  판매자 인트로부분 -->
+				<jsp:include page="/WEB-INF/views/tile/mypage/userIntro.jsp" flush="false"/>
+				
+				
+			<div class="mypage_page01">
+				
+				<jsp:include page="/WEB-INF/views/tile/message/message.jsp" flush="false"/>
+		
+		
+		
 			</div>
-			
-		<div class="mypage_page01">
-			<div class="mypage_updateAccount">
-				<div class="messageForm">
-					<h1>쪽지함</h1>
-					<select id="messageCate" name="messageCate">
-					   <option value="1" <c:if test="${param.messageCate=='1' }">selected</c:if>>받은쪽지함</option>
-					   <option value="2" <c:if test="${param.messageCate=='2' }">selected</c:if>>보낸쪽지함</option>
-					</select>
-<!-- 					<button id="sendMessageBtn">쪽지 보내기</button> -->
-				</div>
-			
-				<div id="messageBox"></div>
-			</div>
-	
-	
-	
 		</div>
-	</div>
-</div>	
+	</div>	
+</div>
 </body>
 </html>
 

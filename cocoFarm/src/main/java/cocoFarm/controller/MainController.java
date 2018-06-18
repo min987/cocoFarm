@@ -7,8 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
 import cocoFarm.dto.Product;
+import cocoFarm.service.Auction_Service;
 import cocoFarm.service.BoardService;
 import cocoFarm.service.ProductService;
 
@@ -17,48 +19,38 @@ public class MainController {
 
 	@Autowired ProductService productService;
 	@Autowired BoardService boardService;
+	@Autowired Auction_Service auctionService;
+	
+	/*
+	 *빈 URL -> 메인 
+	 */
+	@RequestMapping(value="/", method=RequestMethod.GET)
+	public ModelAndView emptytUrl(ModelAndView mav) {
+		
+		mav.addObject("seller",productService.getProViewMainList());
+		mav.addObject("farm",boardService.getboardMainList());
+		mav.addObject("auction",auctionService.getMainAuctionList());
+		mav.setViewName("main/cocomain");
+		return mav;
+	}
+	
 	//2018 06월 11일 main 넣은것
 	@RequestMapping(value="/main/cocomain.do", method=RequestMethod.GET)
 	public String main(HttpSession session,Product product, Model model){
-		System.out.println(session.getAttribute("idx"));
-		System.out.println(session.getAttribute("type")); 
+		
 		//판매글 최근 5개 띄우기
 		model.addAttribute("seller",productService.getProViewMainList());
 		
-		
+		/*boardService.getboardMainList();*/
 		model.addAttribute("farm",boardService.getboardMainList());
 		
-		
-		
-		
-		
-		
-		/*
-	
-		SELECT acc_idx, title, content, written_date, hit, ISDEL,
-		(SELECT stored_filename FROM TODAYS_FARMER_file WHERE acc_idx = t.acc_idx) AS stored_filename	
-		FROM TODAYS_FARMER t 
-		inner join (select IDX, THUMB_LOC main_img from account) a
-		on t.acc_idx = a.IDX;
-		    
-		*/
-		
-		
-		
+		//model.addAttribute("auction",auctionService.getAuctionMainList());
+		model.addAttribute("auction",auctionService.getMainAuctionList());
 		
 		return "main/cocomain";
 	}
-
-	
 	
 	//2018 06월 12일 hwanmin 작업 
-	
-	
-	
-	
-	
-	
-	
 	
 	//판매 상세 정보
 	@RequestMapping(value="/companyinfo.do",method=RequestMethod.GET)
@@ -71,7 +63,4 @@ public class MainController {
 	public void faq() {
 		
 	}
-	
-	
-	
 }

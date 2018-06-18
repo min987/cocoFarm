@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 
-import cocoFarm.dto.OptReceiptMkr;
+import cocoFarm.dto.Account;
 import cocoFarm.dto.Option;
+import cocoFarm.dto.RecptCallParamHolder;
 import cocoFarm.dto.SaleOption;
+import cocoFarm.service.LoginService;
 import cocoFarm.service.ProductService;
 import cocoFarm.service.ReceiptService;
 import cocoFarm.service.RestSvc;
@@ -31,26 +33,35 @@ public class PayController {
 	@Autowired ProductService productService;
 	@Autowired ReceiptService receiptSvc;
 	@Autowired RestSvc restSvc;
+	@Autowired LoginService loginService;
 	
 	@RequestMapping(value="/orderpay.do",method=RequestMethod.GET)
 	public String payVieworder(SaleOption saleoption) {
-
-		return "payment/oderPay";
+		
+		return "redirect:seller.do";
 	}
 	
 	@RequestMapping(value="/orderpay.do",method=RequestMethod.POST)
-	public String payorder(Option option,Model model) {
+	public String payorder(Option option, Model model, HttpSession session) {
+		if(session.getAttribute("idx")==null||session.getAttribute("idx").equals("")) return "error/needLogIn";
+		int idx = (int)session.getAttribute("idx");
+		Account account = loginService.selectAll(idx);
+		System.out.println(session.getAttribute("type"));
+		model.addAttribute("account", account);
+		
+/*
+		System.out.println("결제 옵션 개수: " + option.getSaleOptions().size());
+		System.out.println("옵션1: " + option.getSaleOptions().get(0).getIdx());
+		System.out.println("옵션2: " + option.getSaleOptions().get(1).getIdx());
+		System.out.println("옵션3: " + option.getSaleOptions().get(2).getIdx());*/
+//		System.out.println(option.getSaleOptions().get(0).getIdx());
 		String query ="(";
-		List<Integer> listA = new ArrayList();
-		
-		
+		List<Integer> listA = new ArrayList<Integer>();
 		
 		
 		/*06월 04일 추가*/
 		try{
-			
 			List<SaleOption> saleList = option.getSaleOptions();
-			
 			List<SaleOption> buffer = new ArrayList<SaleOption>();
 			
 			for(SaleOption s : saleList) {
@@ -60,48 +71,35 @@ public class PayController {
 			}
 
 			saleList=buffer;
-			
-			/*saleList.stream().filter((s)->s.getIdx()!=0).;*/
-			System.out.println(saleList);
+
 			for(int i=0; i<saleList.size()-1; i++) {
 				if(saleList.get(i)==null||saleList.get(i).equals("")) {
-					
 					continue;
 				}else {
-						query += saleList.get(i).getIdx()+",";
-						listA.add(saleList.get(i).getProAmount());
-				
+					query += saleList.get(i).getIdx()+",";
+					listA.add(saleList.get(i).getProAmount());
 				}
-					
 			}
 			
-	
 			query +=saleList.get(saleList.size()-1).getIdx() +")";
 			listA.add(saleList.get(saleList.size()-1).getProAmount());
 			
-			/*System.out.println(query);
-			System.out.println(listA);
-			*/
+			//System.out.println(query);
+			//System.out.println(listA);
 			
 			model.addAttribute("opt",(productService.getPayOption(query)));
-			System.out.println((productService.getPayOption(query)));
 			model.addAttribute("amount",listA);
 		
 			//옵션 판매글 불러오는것 
 			String salequery ="(";
-			
 			for(int i=0; i<productService.getPayOption(query).size()-1; i++) {
 				salequery += productService.getPayOption(query).get(i).getSaleIdx()+",";
-				
 			}
 			salequery += productService.getPayOption(query).get(productService.getPayOption(query).size()-1).getSaleIdx()+")";
 			/*System.out.println(salequery);*/
 			
-			
 			productService.getSale_Option(salequery);
-			System.out.println(productService.getSale_Option(salequery));
-			/*System.out.println(productService.getPayOption(query).get(0).getSaleIdx());
-			*/
+			//System.out.println(productService.getPayOption(query).get(0).getSaleIdx());
 			
 			model.addAttribute("pro",(productService.getSale_Option(salequery)));
 			
@@ -111,25 +109,13 @@ public class PayController {
 		return "payment/oderPay";
 	}
 	
-	/*
-	@RequestMapping(value="/paycomple.do",method=RequestMethod.GET)
-	public String paycomple(SaleOption saleoption) {
-		System.out.println(saleoption.getProAmount());
-		
-		
-		return "payment/oderPay";
-	}
-	*/
 	@RequestMapping(value="/paycomple.do",method=RequestMethod.POST)
 	@ResponseBody
 	public String paycomplepots(HttpSession session,String optionlist, String memdeliver,String buyer_name,String memname,String text) {
-//		model.addAttribute("memname", memname);
-//		System.out.println(memname);
-		System.out.println("확인 리스트"+optionlist);
-		System.out.println("확인 결제 확인"+text);
+
+
 		Gson gson=new Gson();
 		List list = gson.fromJson(optionlist, List.class);
-//		System.out.println("---optionlist---");
 		
 		List<SaleOptSerializer> saleOptionList = new ArrayList<>();
 		for(int i=0; i<list.size(); i++) {
@@ -138,69 +124,36 @@ public class PayController {
 			so.setIdx(( (Double)map.get("idx") ).intValue());
 			so.setProAmount( ((Double)map.get("proAmount")).intValue());
 			saleOptionList.add(so);
-			
-			
-//			System.out.println( map.get("idx"));
-//			System.out.println( map.get("proAmount"));
 		}
-		
-//		for(SaleOptSerializer s : saleOptionList) {
-//			System.out.println(s);
-//		}
-		
-		
+
 		/*==================================================================
 		 * 
 		 * result.getIsDone() = 결과가 1이면 성공 0이면 실패
 		 * result.getMainRcpt() = 받아온 영수증 번호, 실패시 null
 		 * 
 		 =================================================================*/
-		OptReceiptMkr result=null;
+		RecptCallParamHolder result=null;
 		
 		if(session.getAttribute("idx")!=null) {
-			result = receiptSvc.makeTempReceipt((Integer)session.getAttribute("idx"), null, saleOptionList);
+			result = receiptSvc.makeTempReceipt((Integer)session.getAttribute("idx"), buyer_name, saleOptionList);
 		}else {
 			//return to errpage
 		}
-		if(result!=null) {
-			System.out.println("======== got Result =========");
-			System.out.println("isDone: "+result.getIsDone());
-			System.out.println("MainRcpt: "+result.getMainRcpt());
-		}else {
-			System.out.println("failed!!!!");
-		}
 		
 		
+		return "{\"MainRcpt\":\""+result.getArg3()+"\",\"isDone\":\""+result.getIsDone()+"\"}";
 		
-		return "{\"MainRcpt\":\""+result.getMainRcpt()+"\",\"isDone\":\""+result.getIsDone()+"\"}";
-		
-		
-//		try {
-//			writer.write("{\"result\":"+ memname +"}");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-		
-		
-		/*Gson gson = new Gson();
-		JsonObject jsonObject = new JsonObject();*/		
-//		try {
-//		
-//			writer.write("{\"result\":"+ memname +"}");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		List<SaleOption> payList = option.getSaleOptions();
-//		System.out.println(payList.get(0).getIdx());
-		//return "payment/oderPay";
 	}
 	
 	
 	/*============================================================================================================================
 	 * 
-	 * 결과값 설명
+	 * 
+	 * result 결과값 설명
+	 *		String[2] 로 결과를 받음
+	 *		[0]: 결과 코드, [1]: 결과 설명
+	 *
+	 *	결과 코드 설명
 	 * 		-100 이하: 코드상의 오류 혹은 각종 예외상황
 	 * 		-20: 결제상태가 "paid" 가 아님
 	 * 	아래는 DB 접속 결과 코드 (위의 경우가 아닌 경우 결과값으로 반환해옴)
@@ -224,26 +177,26 @@ public class PayController {
 	public String paycomple(String imp_uid, HttpSession session, HttpServletResponse response) {
 		
 //		System.out.println("imp_uid: "+imp_uid+ ", session.idx: " + session.getAttribute("idx"));
-		String returnCode = null;
+		String[] result=null;
 		if((Integer)session.getAttribute("idx")!=null) {
-			returnCode =restSvc.checkPayment(imp_uid, (Integer)session.getAttribute("idx")).toString();
+			result =restSvc.checkPayment(imp_uid, (Integer)session.getAttribute("idx"));
+		} else {
+			return null;
+		}
+		if(result!=null) {
+			response.setContentType("application/json");
+			return "{\"result\":"+result[0]+", \"reason\":\""+result[1]+"\"}";
 		}
 		
-		response.setContentType("text");
-		return returnCode;
+		return null;
+		
 	}
-	
 	
 	@RequestMapping(value="/payfail.do",method=RequestMethod.POST)
 	@ResponseBody
-	public String payfail(String imp_uid, HttpSession session) {
-		System.out.println(imp_uid);
-//		System.out.println("merchant_uid : " +merchant_uid + ", imp_uid: "+imp_uid+ ", session.idx: " + session.getAttribute("idx"));
-	/*	String returnCode = null;
-		if((Integer)session.getAttribute("idx")!=null) {
-			returnCode =restSvc.checkPayment(imp_uid, (Integer)session.getAttribute("idx")).toString();
-		}*/
-		
+	public String payfail(String target, HttpSession session) {
+
+		receiptSvc.cancelPayment(target);
 		return "{\"returnCode\":\""+111+"\"}";
 	}
 	
@@ -258,6 +211,8 @@ public class PayController {
 		
 		return "mypage/common/payNee";
 	}
+	
+	
 	
 	
 }

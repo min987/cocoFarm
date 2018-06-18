@@ -199,8 +199,7 @@ $(document).ready( function() {
 			}
 	});
 	</c:if>
-
-
+	
 	/* 상품 후기 열기 눌렀을때   */
 	$(".open_comment").on('click', function() {
 		if($(this).parent().parent().hasClass("info_open")==true) {
@@ -254,7 +253,7 @@ function viewComment() {
 					console.log(idx + ": " + val);
 
 					str += '<span class="wrap_profile">'
-						+	'<span class="comm_accName">계정 아이디</span></span>'
+						+	'<span class="comm_accName">'+ result[idx].acc_name +'</span></span>'
 						+ '<br/><span class="comm_starImg">'+ result[idx].score+'</span>점'
 						+ '<div class="wrap_cont"><span class="txt_prod">${product.title }</span>'
 						+ '<p class="desc_cmt"><span><span class="comm_content">'+ result[idx].content +'</span></span></p>'
@@ -265,8 +264,8 @@ function viewComment() {
 	});
 }
 
+/* 장바구니 버튼 눌렀을 때 */
 function insertCart() {
-	/* 장바구니 버튼 눌렀을 때 */
 	$(".addcart_button").click(function() {
 		$(".option_form").attr("action", "/product/cart.do");
 		$(".option_form").submit();
@@ -295,6 +294,20 @@ function reselect() {
 	$(".proselect_option option:eq(0)").prop("selected", true);
 }
 
+/* 2018-06-15 판매자에게 쪽지보내기 (김민주) */
+/* 쪽지보내기 */
+function popupOpen2(){
+	<c:if test="${sessionScope.idx eq null}">
+		alert("로그인 해주세요.");
+		return false;
+	</c:if>
+	
+	var url= "/mypage/writeMessage.do?msgTo=" + ${product.accIdx};    //팝업창 페이지 URL
+	var winWidth = 400;
+	var winHeight = 500;
+	var popupOption= "width="+winWidth+", height="+winHeight;    //팝업창 옵션(optoin)
+	window.open(url,"",popupOption);
+}
 </script>
 </head>
 <body>
@@ -337,7 +350,7 @@ function reselect() {
 									<dt>배송비결제</dt>
 									<dd><p>주문시 결제</p></dd>
 									<dt>배송비</dt>
-									<dd><p>2500원</p>(50,000원 이상 구매 시 무료 / 제주,도서지역 추가 4,000원)</dd>
+									<dd><p>0원</p>(50,000원 이상 구매 시 무료 / 제주,도서지역 추가 4,000원)</dd>
 							</dl>
 						</div>
 						<div class="border_tbbox">
@@ -368,7 +381,7 @@ function reselect() {
 			</dl>
 			
 			
-			<form class="option_form" action="" method="post">
+			<form class="option_form" method="post">
 				<div id="detail_option">
 					
 				</div>
@@ -382,8 +395,7 @@ function reselect() {
 			
 			<button class="buy_button"><img src="/img/main/buy_icon.png" width="20px;"><span>구매하기</span></button>
 			<button class="addcart_button">장바구니 담기</button>
-			<button class="talk_button">판매자에게 쪽지</button>
-			
+			<button class="talk_button" onclick="popupOpen2();">판매자에게 쪽지</button>
 			</div>
 		
 		</div>

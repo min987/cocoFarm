@@ -49,56 +49,58 @@ function timediff(time_window,systime,status){
 </head>
 
 <body>
-<div id="header">
+<!--main부분 header 부분  -->
+<jsp:include page="/WEB-INF/views/tile/head/mainhead.jsp" flush="false"/>
 
-	<div id="header_top">
+
+
 	<div class="container">
-		<ul class="rigth_list">
-			<li><a href="#">고객</a></li>
-			<li><a href="#">사업자</a></li>
-			<li><a href="#">관리자</a></li>
-		</ul>
+	<div id="view_auction">
+	<c:forEach items="${list }" var="i" varStatus="status">
+	<div class="aution_group">
+	<div class="aution01_img">
 		
-		<ul class="left_list">
-			<li><a href="#">로그인</a></li>
-			<li><a href="#">회원가입</a></li>
-			<li><a href="#">알림</a></li>	
-			<li><a href="#">마이페이지</a></li>	
-		</ul>
+		<a href="/auction/auction_view.do?idx=${i.idx }">
+		<img alt="" src="/auction_img/${i.item_img}" style="width:280px;">
+		</a>
+		<div class="num">경매상품</div>
+<%-- 		<div class="num_01">${i.idx}</div> --%>
+		<div class="semo"></div>
 	</div>
-	</div>
-	<div class="container">
-		<div id="header_boby">
-				<div class="logo"><img src="/img/main/logo_color.png" alt="코코팜 로고"></div>
-				<div class="search"><input type="text" placeholder="농산물 검색하기"><button class="search_icon"></button> </div>
-		</div>
-		<div id="header_nav">
-			<ul class="nav">
-				<li><a href="#">농수산물</a></li>
-				<li><a href="#">경매</a></li>
-				<li><a href="#">농부 스토리</a></li>	
-				<li><a href="#">자주 묻는 질문</a></li>	
-				<li><a href="#">공지사항</a></li>
-				<li><a href="#">회사소개</a></li>
-			</ul>
-		</div>
-		
-		<div id="header_footimg">
-			<div class="scarecrow"></div>
-			<div class="calligraphy"></div>
-		</div>
 	
+	<div class="aution01_listinfo">
+	<ul class="aution01_red">
+	<li style="font-weight: bold;">경매 종료까지</li>
+			<li><p class="timer_test_${status.count }"></p></li>
+			<li></li>
+	</ul>
+	
+	<p class="title_aution01"><span>${i.title}</span></p>
+	<div class="auction_body">
+	<p><span>[경매 등록자]${i.name}</span></p>
+	<p><font color="red" style="font-weight: bold;"><span>현재 입찰가 </span>${i.highest_bid }원</font></p>
+	<p><span>경매 시작가 </span>${i.start_price }원</p>
+	<p class=""><span><fmt:formatDate value="${i.time_window }" pattern="yyyy년 MM월 dd일 " /><fmt:formatDate value="${i.time_window }" pattern="aa HH:mm 종료" /></span></p>
 	</div>
-	<div id="bottom_vimg"></div>
-</div>	
-
-<div id="view_auction">
-	<div class="container">
-	<br>
+	</div>
+	
+	
+	<a href="/auction/auction_view.do?idx=${i.idx }"><div class="btn_auctionbuy">입찰 참여</div></a>
+	</div>
+	<script type="text/javascript">timediff('${i.time_window}','${i.systime}','${status.count}');</script>
+	</c:forEach>
+	</div>
+	
+	
+<%-- 	<c:set var="path" value="<%= request.getSession().getServletContext().getRealPath("upload") %>"></c:set> --%>
+	
 	
 	<table style="margin: 0 auto; position: relative;">
 	<tbody>
-<%-- 	<c:set var="path" value="<%= request.getSession().getServletContext().getRealPath("upload") %>"></c:set> --%>
+	
+	
+	
+	<%-- 
 	
 	<c:forEach items="${list }" var="i" varStatus="status">
 	
@@ -120,9 +122,9 @@ function timediff(time_window,systime,status){
 		</td>
 		<td style="border:solid 1px; width:200px; height:150px;">
 			<ul>
-<%-- 			<li>오라클 현재시간 : ${i.systime }</li> --%>
-<%-- 			<li>경매종료일자 : ${i.time_window }</li> --%>
-<%-- 			<li>${i.time_window }-${i.systime }</li> --%>
+			<li>오라클 현재시간 : ${i.systime }</li>
+			<li>경매종료일자 : ${i.time_window }</li>
+			<li>${i.time_window }-${i.systime }</li>
 			
 			<li style="font-weight: bold;">경매 종료일자</li>
 			<li><fmt:formatDate value="${i.time_window }" pattern="yyyy년 MM월 dd일 " /></li>
@@ -135,7 +137,7 @@ function timediff(time_window,systime,status){
 			</td>
 	</tr>
 	<script type="text/javascript">timediff('${i.time_window}','${i.systime}','${status.count}');</script>
-	</c:forEach>
+	</c:forEach> --%>
 	</tbody>
 	</table>
 	
@@ -147,7 +149,10 @@ function timediff(time_window,systime,status){
 	</div>
 	
 
-</div>
+<!--main부분 foot ver1부분  -->
+<jsp:include page="/WEB-INF/views/tile/footer/mainfoot.jsp" flush="false"/>
+		
+
 
 
 

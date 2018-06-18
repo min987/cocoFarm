@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import cocoFarm.dao.Auction_Dao;
+import cocoFarm.dto.Account;
 import cocoFarm.dto.Auction;
 import cocoFarm.dto.Auction_Inquire;
 import cocoFarm.dto.BidDto;
+import cocoFarm.util.Admin_Auction_Paging;
 import cocoFarm.util.Auction_Paging;
 
 @Service
@@ -30,7 +32,6 @@ public class Auction_ServiceImpl implements Auction_Service {
 		if(file != null && !file.isEmpty()) {
 			// 파일 업로드
 			String path = context.getRealPath("/resources/img/auction_img");
-			System.out.println(path);
 			String filename = UUID.randomUUID().toString().split("-")[0]+"_"+file.getOriginalFilename();
 			File dest = new File(path, filename);
 
@@ -45,14 +46,6 @@ public class Auction_ServiceImpl implements Auction_Service {
 			// DB 기록
 			auction.setItem_img(filename);
 			auctionDao.write(auction);
-			System.out.println(dest);
-//			
-//			BoardFile boardFile = new BoardFile();
-//			boardFile.setBoardno(board.getBoardno());
-//			boardFile.setOriginal_filename(file.getOriginalFilename());
-//			boardFile.setStored_filename(filename);
-//			
-//			boardDao.insertFile(boardFile);
 		}
 	}
 
@@ -106,7 +99,78 @@ public class Auction_ServiceImpl implements Auction_Service {
 	public void putBid(BidDto bid) {
 		auctionDao.putBid(bid);
 	}
+
+	@Override
+	public List getBidderList(Auction viewAuction) {
+		return auctionDao.getBidderList(viewAuction);
+	}
+
+	@Override
+	public List getMemberBid(Account account) {
+		return auctionDao.getMemberBid(account);
+	}
+
+	@Override
+	public void cancelBid(BidDto bid) {
+		auctionDao.cancelBid(bid);
+	}
+
+	@Override
+	public List getauctionList(Auction auction) {
+		return auctionDao.getauctionList(auction);
+	}
+
+	@Override
+	public void auctionCancel(Auction auction) {
+		auctionDao.auctionCancel(auction);
+	}
+
+	@Override
+	public List getAuctionMainList() {
+		return auctionDao.getAuctionMainList();
+	}
+	
+	@Override
+	public List getMainAuctionList() {
+		
+		return auctionDao.getMainAuctionList();
+	}
+
+	
+
+	//================================================
+	
+	@Override
+	public List getauctionList() {
+		return auctionDao.admingetauctionList();
+	}
+
+	@Override
+	public int getauctionTotal() {
+		return auctionDao.admingetauctionTotal();
+	}
+
+	@Override
+	public List getauctionPagingList(Admin_Auction_Paging paging) {
+		return auctionDao.admingetauctionPagingList(paging);
+	}
 	
 	
+	//================================================
+	
+		@Override
+		public List getReceiptList() {
+			return auctionDao.admingetReceiptList();
+		}
+
+		@Override
+		public int getReceiptTotal() {
+			return auctionDao.admingetReceiptTotal();
+		}
+
+		@Override
+		public List getReceiptPagingList(Admin_Auction_Paging paging) {
+			return auctionDao.admingetReceiptPagingList(paging);
+		}
 
 }

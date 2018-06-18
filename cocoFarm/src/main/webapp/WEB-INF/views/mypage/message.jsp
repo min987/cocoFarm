@@ -52,7 +52,6 @@ $(document).ready(function() {
 
 </head>
 <body>
-
 			<div class="mypage_updateAccount">
 				<div class="messageForm">
 					<h1>쪽지함</h1>

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import cocoFarm.dto.Account;
 import cocoFarm.dto.LicenseDto;
-import cocoFarm.dto.Main_receipt;
 import cocoFarm.service.AdminMypageService;
 import cocoFarm.util.Paging;
 
@@ -82,17 +81,19 @@ public class AdminMypageController {
 		//관리자가 판매자등록 거절 버튼 누르면 작동하는 메소드
 		
 		adminMypageService.licenseNoMsg(acc_idx);
+		adminMypageService.licenseNo(acc_idx);
 		
 		return "redirect:/mypageIntro.do";
 	}
 	
-	@RequestMapping(value="/mypage/selectPayAll.do", method=RequestMethod.GET)
-	public void selectPayAll(Main_receipt main_receipt, Model model) {
+	
+	@RequestMapping(value="/mypage/adminPaynee.do", method=RequestMethod.GET)
+	public String adminPaynee(Model model) {
 		
-		List mainReceiptList = adminMypageService.selectPayAll();
+		model.addAttribute("adminPaynee", adminMypageService.adminPaynee());
 		
-		model.addAttribute("mainReceiptList", mainReceiptList);
-		
+		return "mypage/common/adminPaynee";
 	}
+	
 
 }

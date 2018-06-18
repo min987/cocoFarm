@@ -69,7 +69,6 @@ $(document).ready(function() {
 	
 	//합산 금액 배열로 만든거 
 	<c:set var="sumcon" value="sumcon"/> 
-	<c:set var="sumcon" value="sumcon"/> 
 	console.log(${pro.size()});
 	
 	/*총 수량 갯수  */
@@ -194,6 +193,17 @@ function requestPayment() {
 	/*수령장소  */
 	var mem_deliver=$(".mem_deliver").val();
 	
+	/*주소  */
+	var postcodify_address=$(".postcodify_address").val();
+	
+	var postcodify_details=$(".postcodify_details").val();
+	/*우편주소  */
+	var area=$(".postcodify_postcode5").val();
+
+	var phone_a=$(".phone_a").val();
+	var phone_b=$(".phone_b").val();
+	var phone_c=$(".phone_c").val();
+	
 	console.log(optionlist);
 	JSON.stringify(optionlist);
 	var dff=JSON.stringify(optionlist);
@@ -224,7 +234,6 @@ function requestPayment() {
 	console.log('Main_Rcpt: '+Main_Rcpt);
 	console.log('is_Done: '+is_Done);
 	console.log('--------------------');
-	var result =0;
 	if(is_Done != 0) {
 		IMP.request_pay({
 				pg : 'danal', //PG사 - 'kakao':카카오페이, 'html5_inicis':이니시스(웹표준결제), 'nice':나이스페이, 'jtnet':제이티넷, 'uplus':LG유플러스, 'danal':다날, 'payco':페이코, 'syrup':시럽페이, 'paypal':페이팔
@@ -233,10 +242,10 @@ function requestPayment() {
 				name : '주문명:결제테스트', //주문명 - 선택항목, 결제정보 확인을 위한 입력, 16자 이내로 작성
 				amount : ${allsum}, //결제금액 - 필수항목
 				buyer_email : 'iamport@siot.do', //주문자Email - 선택항목
-				buyer_name : '${sessionScope.name}', //주문자명 - 선택항목
-				buyer_tel : '010-1234-5678', //주문자연락처 - 필수항목, 누락되면 PG사전송 시 오류 발생
-				buyer_addr : '서울특별시 강남구 삼성동', //주문자주소 - 선택항목
-				buyer_postcode : '123-456', //주문자우편번호 - 선택항목
+				buyer_name : ${account.name}, //주문자명 - 선택항목
+				buyer_tel : phone_a+phone_b+phone_c, //주문자연락처 - 필수항목, 누락되면 PG사전송 시 오류 발생
+				buyer_addr :postcodify_address+postcodify_details, //주문자주소 - 선택항목
+				buyer_postcode :area, //주문자우편번호 - 선택항목
 				m_redirect_url : 'https://www.yourdomain.com/payments/complete' //모바일결제후 이동페이지 - 선택항목, 모바일에서만 동작
 			}, function(rsp) { // callback - 결제 이후 호출됨, 이곳에서 DB에 저장하는 로직을 작성한다
 					if ( rsp.success ) { // 결제 성공 로직
@@ -259,21 +268,21 @@ function requestPayment() {
 									//buyer_name :rsp.buyer_name 
 									}
 							}).done(function(data) {
+								console.log(data);
 								//[2] 서버에서 REST API로 결제정보확인 및 서비스루틴이 정상적인 경우
-								result = parseInt(data);
+								var result = data.result;
+								
 								if ( result==1 ) {
 									var msg = '결제가 완료되었습니다.';
 									msg += '\n고유ID : ' + rsp.imp_uid;
 									msg += '\n상점 거래ID : ' + rsp.merchant_uid;
-									msg += '\결제 금액 : ' + rsp.paid_amount;
-									msg += '카드 승인번호 : ' + rsp.apply_num;
+									msg += '\n결제 금액 : ' + rsp.paid_amount;
+									msg += '\n카드 승인번호 : ' + rsp.apply_num;
 									alert(msg);
-								}else if (result<0 && result>-100 ){
-									alert('data: '+data)
 								}else {
-									alert("취소취소, data: " +data);
 									//[3] 아직 제대로 결제가 되지 않았습니다.
 									//[4] 결제된 금액이 요청한 금액과 달라 결제를 자동취소처리하였습니다.
+									alert('result: ' +data.result+ '\n, reason: '+data.reason);
 									/* 
 									$.ajax({
 										   type : "POST",
@@ -295,18 +304,33 @@ function requestPayment() {
 											   alert("취소시 에이젝스 실패"); 
 										   }
 										});
-									 */	
+									 */
 								}
 							});
-				
 					} else { // 결제 실패 로직
-							var msg = '결제에 실패하였습니다.';
-							msg += '에러내용 : ' + rsp.error_msg;
-							//임시 영수증 삭제 로직 추가.
+						var msg = '결제에 실패하였습니다.';
+						msg += '에러내용 : ' + rsp.error_msg;
+						//임시 영수증 삭제 로직 추가.
+						$.ajax({
+							   type : "POST",
+							   url : "/payfail.do",
+							   dataType : "json",
+							   async: false,
+							   data : {
+								   target : Main_Rcpt
+							   },
+								success : function(data) {
+								console.log('취소시 에이젝스 성공 - '+'data.MainRcpt: '+data.MainRcpt);
+// 								alert("취소시 에이젝스 성공");
+							   },
+							   error : function(e) {
+								  console.log(e.responseText);
+// 								   alert("취소시 에이젝스 실패"); 
+							   }
+						});
 					}
-					alert('123123');
 // 					alert(msg);
-				});
+				});//아임포트 통신 Ajax 완료.
 	} else{
 		alert('임시저장 실패');
 		//임시 영수증 삭제 로직 추가.
@@ -364,10 +388,10 @@ $(function() {
 				 
 						<td class="product_info">
 							<a href="" >
-							<img src="/proimg/${pro_data.faceImg}" style="height: 92px">
+							<img src="/proimg/${pro_data.faceImg}" style="width: 92px">
 							</a>
 							<div class="product_dsc">
-								<strong class="product_bn">[농수산물 판매자] 법인명</strong>
+								<strong class="product_bn">[법인명]${pro_data.corporation_name}</strong>
 								<a href="#" class="product_name">
 									<strong>[${today}]${pro_data.title}</strong>
 								</a>
@@ -391,7 +415,7 @@ $(function() {
 						
 						
 						<td>
-						<a class="who_parmer" href="">판매자판매자</a>
+						<a class="who_parmer" href="">${pro_data.name}</a>
 						</td>
 						<td>
 						<span class="img_deliver_icon"></span>
@@ -419,8 +443,8 @@ $(function() {
 					<span class="reap">
 					배송지선택
 					</span>
-					<input type="radio"  class="radio_r1" name="deliver_radio" value="1"/><label for="r1">신규배송지</label>
-					<input type="radio"  class="radio_r1" name="deliver_radio" value="2" checked="checked"/><label for="r2">김환민</label>
+					<input type="radio"  class="radio_r1" name="deliver_radio" value="1"/><label for="r1">신규 배송지</label>
+					<input type="radio"  class="radio_r1" name="deliver_radio" value="2" checked="checked"/><label for="r2">${account.name}</label>
 				</div>
 				<div class="delive_reci new_reci">
 					<span class="reap ">

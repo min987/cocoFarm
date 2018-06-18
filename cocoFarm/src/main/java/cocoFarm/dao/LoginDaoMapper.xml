@@ -6,7 +6,7 @@
 	
 	<insert parameterType="cocoFarm.dto.Account" id="join">
 		INSERT INTO account(idx, id, pw, name, email, phone, postnum, addr, detailed_addr, thumb_loc) 
-		VALUES (account_seq.nextval, #{id}, #{pw}, #{name}, #{email}, #{phone}, #{postnum}, #{addr}, #{detailed_addr}, 'profile.jsp')
+		VALUES (account_seq.nextval, #{id}, #{pw}, #{name}, #{email}, #{phone}, #{postnum}, #{addr}, #{detailed_addr}, 'profile.jpg')
 	</insert>
 	
 	<select id="loginCheck" parameterType="cocoFarm.dto.Account" resultType="int">
@@ -23,22 +23,22 @@
 	
 	<select id="selectId" parameterType="cocoFarm.dto.Account" resultType="int">
 		SELECT COUNT(*) FROM account
-		WHERE id = #{id} AND isDel=0
+		WHERE id = #{id} 
 	</select>
 	
 	<select id="findId" parameterType="cocoFarm.dto.Account" resultType="String">
 		SELECT id FROM account
-		WHERE name=#{name} AND phone=#{phone} AND isDel=0
+		WHERE name=#{name} AND phone=#{phone} AND isDel!=1
 	</select>
 	
 	<select id="findPw" parameterType="cocoFarm.dto.Account" resultType="String">
 		SELECT pw FROM account
-		WHERE id=#{id} AND phone=#{phone} AND isDel=0
+		WHERE id=#{id} AND phone=#{phone} AND isDel!=1
 	</select>
 	
 	<select id="selectAll" parameterType="int" resultType="cocoFarm.dto.Account">
 		SELECT * FROM account
-		WHERE idx=#{idx} AND isDel=0
+		WHERE idx=#{idx} AND isDel!=1
 	</select>
 	
 	<update id="updateAccount" parameterType="cocoFarm.dto.Account">
@@ -65,7 +65,7 @@
 		<if test="detailed_addr != null and detailed_addr != ''">
 			,detailed_addr = #{detailed_addr }
 		</if>
-		WHERE idx = #{idx } AND isDel=0
+		WHERE idx = #{idx } AND isDel!=1
 	</update>
 	
 	<update id="updateProfile" parameterType="cocoFarm.dto.Account">
